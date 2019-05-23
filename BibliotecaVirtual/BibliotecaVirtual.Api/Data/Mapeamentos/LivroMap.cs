@@ -15,14 +15,14 @@ namespace BibliotecaVirtual.Api.Data.Mapeamentos
                 .IsRequired();
 
             builder.Property(t => t.Resumo)
-                .HasMaxLength(500)
+                .HasMaxLength(500)                
                 .IsRequired(false);
 
             builder.Property(t => t.AnoPublicacao)
                 .IsRequired();
 
             builder.HasOne(t => t.Editora)
-              .WithMany(t => t.Livros)
+              .WithMany()
               .HasForeignKey(t => t.EditoraId);
 
             builder.ToTable(nameof(Livro));

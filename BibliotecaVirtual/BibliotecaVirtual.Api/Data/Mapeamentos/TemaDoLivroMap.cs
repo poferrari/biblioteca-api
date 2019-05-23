@@ -11,7 +11,7 @@ namespace BibliotecaVirtual.Api.Data.Mapeamentos
             builder.HasKey(t => new { t.TemaId, t.LivroId });
 
             builder.HasOne(t => t.Tema)
-                .WithMany(t => t.Livros)
+                .WithMany()
                 .HasForeignKey(t => t.TemaId);
 
             builder.HasOne(t => t.Livro)

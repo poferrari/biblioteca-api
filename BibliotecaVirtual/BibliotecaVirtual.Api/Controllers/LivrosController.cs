@@ -1,12 +1,10 @@
-﻿using System;
+﻿using BibliotecaVirtual.Api.Data;
+using BibliotecaVirtual.Api.Models;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using BibliotecaVirtual.Api.Data;
-using BibliotecaVirtual.Api.Models;
 
 namespace BibliotecaVirtual.Api.Controllers
 {
@@ -20,77 +18,46 @@ namespace BibliotecaVirtual.Api.Controllers
         {
             _context = context;
         }
-
-        // GET: api/Livros
+        
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Livro>>> GetLivros()
+        public async Task<ActionResult<IEnumerable<Livro>>> Get()
         {
-            return await _context.Livros.ToListAsync();
+            var livros = await _context.Livros               
+                .ToListAsync();
+
+            return livros;
         }
-
-        // GET: api/Livros/5
+        
         [HttpGet("{id}")]
-        public async Task<ActionResult<Livro>> GetLivro(int id)
+        public async Task<ActionResult<Livro>> Get(int id)
         {
-            var livro = await _context.Livros.FindAsync(id);
+            var livro = await _context.Livros
+                .Include(t => t.Editora)
+                .Include(t => t.Temas)
+                    .ThenInclude(s => s.Tema)
+                .FirstOrDefaultAsync(t => t.Id == id);
 
-            if (livro == null)
-            {
-                return NotFound();
-            }
+            if (livro == null)            
+                return NotFound();            
 
             return livro;
-        }
-
-        // PUT: api/Livros/5
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutLivro(int id, Livro livro)
-        {
-            if (id != livro.Id)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(livro).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!LivroExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
-        }
-
-        // POST: api/Livros
+        }       
+        
         [HttpPost]
-        public async Task<ActionResult<Livro>> PostLivro(Livro livro)
+        public async Task<ActionResult<Livro>> Post(Livro livro)
         {
             _context.Livros.Add(livro);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetLivro", new { id = livro.Id }, livro);
+            return CreatedAtAction("Get", new { id = livro.Id }, livro);
         }
-
-        // DELETE: api/Livros/5
+        
         [HttpDelete("{id}")]
-        public async Task<ActionResult<Livro>> DeleteLivro(int id)
+        public async Task<ActionResult<Livro>> Delete(int id)
         {
             var livro = await _context.Livros.FindAsync(id);
-            if (livro == null)
-            {
-                return NotFound();
-            }
+            if (livro == null)            
+                return NotFound();            
 
             _context.Livros.Remove(livro);
             await _context.SaveChangesAsync();
@@ -98,9 +65,10 @@ namespace BibliotecaVirtual.Api.Controllers
             return livro;
         }
 
-        private bool LivroExists(int id)
-        {
-            return _context.Livros.Any(e => e.Id == id);
-        }
+        [HttpGet("{id}/temas")]
+        public async Task<ActionResult<IEnumerable<TemaDoLivro>>> GetTemasDoLivroId(int id)
+           => await _context.TemasDoLivro
+                       .Include(t => t.Tema)
+                       .Where(t => t.LivroId == id).ToListAsync();       
     }
 }

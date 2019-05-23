@@ -6,8 +6,6 @@ namespace BibliotecaVirtual.Api.Models
     {        
         public int Id { get; set; }
         public string Nome { get; set; }
-        public string Descricao { get; set; }
-
-        public List<TemaDoLivro> Livros { get; set; }
+        public string Descricao { get; set; }        
     }
 }
